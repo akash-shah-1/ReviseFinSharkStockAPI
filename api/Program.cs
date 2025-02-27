@@ -1,3 +1,6 @@
+using api.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,7 +10,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Db Connection
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+    context.Database.Migrate(); // Apply migration first
+    MyApp.Data.Seeders.StockSeeder.Seed(context);
+    MyApp.Data.Seeders.CommentSeeder.Seed(context);
+
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -20,7 +38,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseAuthorization(); 
 
-//app.MapControllers();
+app.MapControllers();
 
 //By  AddEndpointsApiExplorer(), the /check endpoint will be included in the Swagger documentation, making it easier to discover and test through the Swagger UI.
 app.MapGet("/check", () => "OK");
