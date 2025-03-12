@@ -6,6 +6,7 @@ using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace api.Controllers
 {
@@ -23,6 +24,7 @@ namespace api.Controllers
 
         //Get all Stocks
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllStocks([FromQuery] QueryObject query)
         {
             var stocks = await _stockRepo.GetAllAsync(query);
